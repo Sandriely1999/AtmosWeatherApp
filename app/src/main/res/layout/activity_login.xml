@@ -8,8 +8,6 @@
     android:background="@color/white">
 
     <!-- Logo/Título -->
-
-    <!-- Campo Username -->
     <ImageView
         android:id="@+id/imgLogo"
         android:layout_width="317dp"
