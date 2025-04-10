@@ -14,6 +14,7 @@ import com.unasp.atmosweatherapp.model.LoginRequest;
 import com.unasp.atmosweatherapp.model.LoginResponse;
 import com.unasp.atmosweatherapp.service.ApiService;
 import com.unasp.atmosweatherapp.service.RetrofitClient;
+import com.unasp.atmosweatherapp.utils.MainActivity;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        editTextEmail = findViewById(R.id.editTextEmail);
+        editTextEmail = findViewById(R.id.editTextUsername);
         editTextSenha = findViewById(R.id.editTextSenha);
         btnLogin = findViewById(R.id.btnLogin);
         btnCriarConta = findViewById(R.id.btnCriarConta);
@@ -56,7 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         // Converter email para username se necessário
         String username = email; // Ou lógica de conversão se diferente
 
-        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
         LoginRequest request = new LoginRequest(username, senha);
 
         apiService.fazerLogin(request).enqueue(new Callback<LoginResponse>() {
