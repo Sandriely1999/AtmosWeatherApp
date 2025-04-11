@@ -25,7 +25,14 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".CadastroActivity" />
+        <activity
+            android:name=".CadastroActivity"
+            android:exported="false"
+            android:parentActivityName=".LoginActivity"> <!-- Fechamento correto da tag -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".LoginActivity"/>
+        </activity>
 
     </application>
 

@@ -4,4 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="dark_purple">#1A1A2E</color>
+    <color name="error_red">#F44336</color>
+    <color name="text_hint">#808080</color>
 </resources>

@@ -15,7 +15,6 @@ import com.unasp.atmosweatherapp.model.CadastroRequest;
 import com.unasp.atmosweatherapp.model.LoginResponse;
 import com.unasp.atmosweatherapp.service.ApiService;
 import com.unasp.atmosweatherapp.service.RetrofitClient;
-import com.unasp.atmosweatherapp.utils.MainActivity;
 import com.unasp.atmosweatherapp.utils.SessionManager;
 
 import retrofit2.Call;
