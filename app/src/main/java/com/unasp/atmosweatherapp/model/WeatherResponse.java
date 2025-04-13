@@ -1,13 +1,13 @@
 package com.unasp.atmosweatherapp.model;
 
-import java.time.LocalDateTime;
+
 
 public class WeatherResponse {
     private String city;
     private double temperature;
     private int humidity;
     private String description;
-    private LocalDateTime forecastDate;
+    private String forecastDate;
 
     public String getCity() {
         return city;
@@ -41,11 +41,9 @@ public class WeatherResponse {
         this.description = description;
     }
 
-    public LocalDateTime getForecastDate() {
+    public String getForecastDate() {
         return forecastDate;
     }
 
-    public void setForecastDate(LocalDateTime forecastDate) {
-        this.forecastDate = forecastDate;
-    }
+
 }
