@@ -77,43 +77,53 @@ public class LoginActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         btnLogin.setEnabled(false);
 
-        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
-        LoginRequest request = new LoginRequest(username, password);
+        try {
+            ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+            LoginRequest request = new LoginRequest(username, password);
 
-        apiService.fazerLogin(request).enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                progressBar.setVisibility(View.GONE);
-                btnLogin.setEnabled(true);
+            apiService.fazerLogin(request).enqueue(new Callback<LoginResponse>() {
+                @Override
+                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                    progressBar.setVisibility(View.GONE);
+                    btnLogin.setEnabled(true);
 
-                if (response.isSuccessful() && response.body() != null) {
-                    // Login bem-sucedido
-                    LoginResponse loginResponse = response.body();
-                    new SessionManager(LoginActivity.this)
-                            .saveAuthToken(loginResponse.getToken(), loginResponse.getUsername());
-
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                    finish();
-                } else {
-                    // Tratamento de erro
                     try {
-                        String errorBody = response.errorBody().string();
+                        if (response.isSuccessful() && response.body() != null) {
+                            // Login bem-sucedido
+                            LoginResponse loginResponse = response.body();
+                            new SessionManager(LoginActivity.this)
+                                    .saveAuthToken(loginResponse.getToken(), loginResponse.getUsername());
+
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
+                        } else {
+                            // Tratamento de erro
+                            String errorBody = response.errorBody() != null ? response.errorBody().string() : "Erro desconhecido";
+                            Toast.makeText(LoginActivity.this,
+                                    "Erro: " + errorBody, Toast.LENGTH_LONG).show();
+                        }
+                    } catch (Exception e) {
                         Toast.makeText(LoginActivity.this,
-                                "Erro: " + errorBody, Toast.LENGTH_LONG).show();
-                    } catch (IOException e) {
-                        Toast.makeText(LoginActivity.this,
-                                "Erro no login", Toast.LENGTH_LONG).show();
+                                "Erro ao processar resposta: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        e.printStackTrace();
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                progressBar.setVisibility(View.GONE);
-                btnLogin.setEnabled(true);
-                Toast.makeText(LoginActivity.this,
-                        "Falha na conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+                @Override
+                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    progressBar.setVisibility(View.GONE);
+                    btnLogin.setEnabled(true);
+                    Toast.makeText(LoginActivity.this,
+                            "Falha na conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                    t.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            progressBar.setVisibility(View.GONE);
+            btnLogin.setEnabled(true);
+            Toast.makeText(LoginActivity.this,
+                    "Erro inesperado: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
     }
 }

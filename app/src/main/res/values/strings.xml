@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AtmosWeatherApp</string>
+    <string name="favoritar_cidade">Favoritar cidade</string>
 </resources>

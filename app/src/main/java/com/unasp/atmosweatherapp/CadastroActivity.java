@@ -3,6 +3,7 @@ package com.unasp.atmosweatherapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,19 +49,26 @@ public class CadastroActivity extends AppCompatActivity {
     }
 
     private boolean validarCampos(String username, String senha) {
+        boolean isValid = true;
+
         if (username.isEmpty()) {
             editTextUsername.setError("Preencha o username");
-            return false;
+            isValid = false;
         }
+
         if (senha.isEmpty()) {
             editTextSenha.setError("Preencha a senha");
-            return false;
+            isValid = false;
+        } else if (senha.length() < 6) {
+            editTextSenha.setError("Senha deve ter no mínimo 6 caracteres");
+            isValid = false;
         }
-        return true;
+
+        return isValid;
     }
 
     private void cadastrarUsuario(String username, String senha) {
-        // Mostra ProgressBar e desabilita botão
+        Log.d("Cadastro", "Tentando cadastrar: " + username);
         progressBar.setVisibility(View.VISIBLE);
         btnCadastrar.setEnabled(false);
 
@@ -88,9 +96,11 @@ public class CadastroActivity extends AppCompatActivity {
                 } else {
                     try {
                         String errorBody = response.errorBody().string();
-                        Toast.makeText(CadastroActivity.this, "Erro: " + errorBody, Toast.LENGTH_LONG).show();
+                        Toast.makeText(CadastroActivity.this,
+                                "Erro no cadastro: " + errorBody, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
-                        Toast.makeText(CadastroActivity.this, "Erro ao cadastrar", Toast.LENGTH_LONG).show();
+                        Toast.makeText(CadastroActivity.this,
+                                "Erro ao processar resposta", Toast.LENGTH_LONG).show();
                     }
                 }
             }

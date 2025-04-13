@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -12,10 +14,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
-import com.unasp.atmosweatherapp.model.WeatherResponse;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.unasp.atmosweatherapp.service.ApiService;
 import com.unasp.atmosweatherapp.service.RetrofitClient;
 import com.unasp.atmosweatherapp.utils.SessionManager;
+
+import java.io.IOException;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,11 +34,19 @@ public class MainActivity extends AppCompatActivity {
     private CardView cardWeather;
     private TextView tvCity, tvTemperature, tvHumidity, tvDescription, tvDateTime;
     private ProgressBar progressBar;
+    private ImageButton btnFavorite;
+    private Long currentFavoriteId = null;
+    private boolean isCurrentFavorite = false;
+    private BottomNavigationView bottomNavigation;
+    private ImageView ivWeatherIcon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setSelectedItemId(R.id.nav_favorite);
 
         session = new SessionManager(this);
         if (!session.isLoggedIn()) {
@@ -43,6 +56,15 @@ public class MainActivity extends AppCompatActivity {
 
         initViews();
         setupListeners();
+        handleFavoriteSelection();
+    }
+
+    private void handleFavoriteSelection() {
+        if (getIntent() != null && getIntent().hasExtra("selectedCity")) {
+            String selectedCity = getIntent().getStringExtra("selectedCity");
+            etSearchCity.setText(selectedCity);
+            fetchWeatherData(selectedCity);
+        }
     }
 
     private void initViews() {
@@ -56,6 +78,9 @@ public class MainActivity extends AppCompatActivity {
         tvDescription = findViewById(R.id.tvDescription);
         tvDateTime = findViewById(R.id.tvDateTime);
         progressBar = findViewById(R.id.progressBar);
+        btnFavorite = findViewById(R.id.btnFavorite);
+        bottomNavigation = findViewById(R.id.bottom_navigation);
+        ivWeatherIcon = findViewById(R.id.ivWeatherIcon);
     }
 
     private void setupListeners() {
@@ -67,16 +92,53 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Digite uma cidade", Toast.LENGTH_SHORT).show();
             }
         });
-
         btnLogout.setOnClickListener(v -> logout());
+
+        btnFavorite.setOnClickListener(v -> {
+            if (isCurrentFavorite) {
+                removeFavoriteCity();
+            } else {
+                addFavoriteCity();
+            }
+        });
+
+        bottomNavigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_weather) {
+                // Já está na tela de clima
+                return true;
+            } else if (id == R.id.nav_forecast) {
+                startActivity(new Intent(this, ForecastActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_compare) {
+                startActivity(new Intent(this, CompareActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_favorite) {
+                startActivity(new Intent(this, FavoritesActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
+
+        // Define a tela ativa como "Clima" por padrão
+        bottomNavigation.setSelectedItemId(R.id.nav_weather);
     }
 
     private void fetchWeatherData(String city) {
         progressBar.setVisibility(View.VISIBLE);
         cardWeather.setVisibility(View.GONE);
 
+
         ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
         Call<WeatherResponse> call = apiService.getCurrentWeather(city);
+
 
         call.enqueue(new Callback<WeatherResponse>() {
             @Override
@@ -86,9 +148,12 @@ public class MainActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     displayWeatherData(response.body());
                 } else {
-                    Toast.makeText(MainActivity.this,
-                            "Não foi possível obter dados para esta cidade",
-                            Toast.LENGTH_SHORT).show();
+                    try {
+                        String errorBody = response.errorBody() != null ?
+                                response.errorBody().string() : "Erro vazio";
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -103,16 +168,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayWeatherData(WeatherResponse weather) {
-        cardWeather.setVisibility(View.VISIBLE);
+       try {
+           cardWeather.setVisibility(View.VISIBLE);
 
-        tvCity.setText(weather.getCity());
-        tvTemperature.setText(String.format("Temperatura: %.1f°C", weather.getTemperature()));
-        tvHumidity.setText(String.format("Umidade: %d%%", weather.getHumidity()));
-        tvDescription.setText(weather.getDescription());
-        tvDateTime.setText(String.format("Atualizado em: %s",
-                weather.getForecastDate().toString()));
+           tvCity.setText(weather.getCity());
+           tvTemperature.setText(String.format("Temperatura: %.1f°C", weather.getTemperature()));
+           tvHumidity.setText(String.format("Umidade: %d%%", weather.getHumidity()));
+           tvDescription.setText(weather.getDescription());
+           tvDateTime.setText(String.format("Atualizado em: %s",
+                   weather.getForecastDate()));
+
+           setWeatherIcon(weather.getDescription().toLowerCase());
+           checkIfCityIsFavorite(weather.getCity());
+       } catch (Exception e) {
+           throw new RuntimeException(e);
+       }
+
+
     }
 
+    private void setWeatherIcon(String description) {
+        int iconResId;
+        if (description.contains("chuva")) {
+            iconResId = R.drawable.ic_rain;
+        } else if (description.contains("nublado")) {
+            iconResId = R.drawable.ic_cloudy;
+        } else if (description.contains("neblina")) {
+            iconResId = R.drawable.ic_cloudy;
+        } else if (description.contains("vento")) {
+            iconResId = R.drawable.ic_wind;
+        } else if (description.contains("algumas nuvens")) {
+            iconResId = R.drawable.ic_partly_cloudy_day;
+        } else {
+            iconResId = R.drawable.ic_sunny;
+        }
+        ivWeatherIcon.setImageResource(iconResId);
+    }
     private void logout() {
         session.clear();
         redirectToLogin();
@@ -125,4 +216,113 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+    private void addFavoriteCity() {
+        String cityName = tvCity.getText().toString().split(",")[0].trim();
+        boolean setAsDefault = false; // Ou adicione lógica para definir como padrão
+
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+        Call<FavoriteCityResponse> call = apiService.addFavoriteCity(cityName, setAsDefault);
+
+        call.enqueue(new Callback<FavoriteCityResponse>() {
+            @Override
+            public void onResponse(Call<FavoriteCityResponse> call, Response<FavoriteCityResponse> response) {
+                if (response.isSuccessful()) {
+                    currentFavoriteId = response.body().getId();
+                    isCurrentFavorite = true;
+                    updateFavoriteButton();
+                    Toast.makeText(MainActivity.this, "Cidade favoritada!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FavoriteCityResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Erro ao favoritar", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void removeFavoriteCity() {
+        if (currentFavoriteId == null) return;
+
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+        Call<Void> call = apiService.removeFavoriteCity(currentFavoriteId);
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    currentFavoriteId = null;
+                    isCurrentFavorite = false;
+                    updateFavoriteButton();
+                    Toast.makeText(MainActivity.this, "Favorito removido", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Erro ao remover favorito", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateFavoriteButton() {
+        if (isCurrentFavorite) {
+            btnFavorite.setImageResource(R.drawable.ic_favorite2);
+        } else {
+            btnFavorite.setImageResource(R.drawable.ic_favorite1);
+        }
+    }
+
+    private void checkIfCityIsFavorite(String cityName) {
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+        Call<List<FavoriteCityResponse>> call = apiService.getFavoriteCities();
+
+        call.enqueue(new Callback<List<FavoriteCityResponse>>() {
+            @Override
+            public void onResponse(Call<List<FavoriteCityResponse>> call, Response<List<FavoriteCityResponse>> response) {
+                if (response.isSuccessful()) {
+                    isCurrentFavorite = false;
+                    for (FavoriteCityResponse favorite : response.body()) {
+                        if (favorite.getCityName().equalsIgnoreCase(cityName)) {
+                            currentFavoriteId = favorite.getId();
+                            isCurrentFavorite = true;
+                            if (favorite.isDefault()) {
+                                // Lógica adicional se for a cidade padrão
+                            }
+                            break;
+                        }
+                    }
+                    updateFavoriteButton();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FavoriteCityResponse>> call, Throwable t) {
+                // Silencioso - não precisa mostrar erro
+            }
+        });
+    }
+
+    private void setDefaultCity(Long cityId) {
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+        Call<FavoriteCityResponse> call = apiService.setDefaultCity(cityId);
+
+        call.enqueue(new Callback<FavoriteCityResponse>() {
+            @Override
+            public void onResponse(Call<FavoriteCityResponse> call, Response<FavoriteCityResponse> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Cidade padrão definida!", Toast.LENGTH_SHORT).show();
+                    // Atualize sua lista de favoritos
+                    checkIfCityIsFavorite(tvCity.getText().toString().split(",")[0].trim());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FavoriteCityResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Erro ao definir cidade padrão", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }

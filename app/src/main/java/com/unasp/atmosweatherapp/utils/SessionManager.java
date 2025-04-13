@@ -18,10 +18,14 @@ public class SessionManager {
         editor = pref.edit();
     }
 
+    public boolean isLoggedIn() {
+        return getAuthToken() != null;
+    }
+
     public void saveAuthToken(String token, String username) {
         editor.putString(KEY_TOKEN, token);
         editor.putString(KEY_USERNAME, username);
-        editor.commit();
+        editor.apply(); // Mudado de commit() para apply()
     }
 
     public String getAuthToken() {
@@ -34,6 +38,6 @@ public class SessionManager {
 
     public void clear() {
         editor.clear();
-        editor.commit();
+        editor.apply(); // Mudado de commit() para apply()
     }
 }

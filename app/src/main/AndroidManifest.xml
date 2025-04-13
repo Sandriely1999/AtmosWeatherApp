@@ -34,6 +34,13 @@
                 android:value=".LoginActivity"/>
         </activity>
 
+        <activity android:name=".MainActivity" android:exported="true"/>
+
+        <activity android:name=".ForecastActivity"/>
+        <activity android:name=".CompareActivity"/>
+        <activity android:name=".FavoritesActivity"/>
+        <activity android:name=".ProfileActivity"/>
+
     </application>
 
 </manifest>
