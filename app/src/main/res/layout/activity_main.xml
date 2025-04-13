@@ -87,11 +87,12 @@
                             android:id="@+id/btnFavorite"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:background="@color/dark_purple"
                             android:src="@drawable/favorite_selector"
-                            android:contentDescription="@string/favoritar_cidade"
+                            android:contentDescription="Favoritar cidade"
+                            android:background="?attr/selectableItemBackgroundBorderless"
                             android:padding="8dp"
-                            />
+                            app:tint="@null" /> <!-- Remove o tint para usar as cores originais -->
+
                     </LinearLayout>
 
                     <TextView

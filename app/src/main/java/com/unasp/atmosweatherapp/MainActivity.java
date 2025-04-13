@@ -2,6 +2,8 @@ package com.unasp.atmosweatherapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.unasp.atmosweatherapp.model.FavoriteCityResponse;
+import com.unasp.atmosweatherapp.model.WeatherResponse;
 import com.unasp.atmosweatherapp.service.ApiService;
 import com.unasp.atmosweatherapp.service.RetrofitClient;
 import com.unasp.atmosweatherapp.utils.SessionManager;
@@ -95,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
         btnLogout.setOnClickListener(v -> logout());
 
         btnFavorite.setOnClickListener(v -> {
+            v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+            v.setSelected(!v.isSelected()); // Atualiza visualmente imediatamente
             if (isCurrentFavorite) {
                 removeFavoriteCity();
             } else {
@@ -104,27 +110,24 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNavigation.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+            Intent intent;
             if (id == R.id.nav_weather) {
-                // Já está na tela de clima
                 return true;
             } else if (id == R.id.nav_forecast) {
-                startActivity(new Intent(this, ForecastActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
+                intent = new Intent(this, ForecastActivity.class);
             } else if (id == R.id.nav_compare) {
-                startActivity(new Intent(this, CompareActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
+                intent = new Intent(this, CompareActivity.class);
             } else if (id == R.id.nav_favorite) {
-                startActivity(new Intent(this, FavoritesActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
+                intent = new Intent(this, FavoritesActivity.class);
             } else if (id == R.id.nav_profile) {
-                startActivity(new Intent(this, ProfileActivity.class));
-                overridePendingTransition(0, 0);
-                return true;
+                intent = new Intent(this, ProfileActivity.class);
+            } else {
+                return false;
             }
-            return false;
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            return true;
         });
 
         // Define a tela ativa como "Clima" por padrão
@@ -267,11 +270,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateFavoriteButton() {
-        if (isCurrentFavorite) {
-            btnFavorite.setImageResource(R.drawable.ic_favorite2);
-        } else {
-            btnFavorite.setImageResource(R.drawable.ic_favorite1);
-        }
+        runOnUiThread(() -> {
+            btnFavorite.setSelected(isCurrentFavorite);
+            btnFavorite.invalidate(); // Força a redraw
+            btnFavorite.animate()
+                    .scaleX(1.2f)
+                    .scaleY(1.2f)
+                    .setDuration(200)
+                    .withEndAction(() -> btnFavorite.animate().scaleX(1f).scaleY(1f).setDuration(200));
+        });
     }
 
     private void checkIfCityIsFavorite(String cityName) {
@@ -281,25 +288,22 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<FavoriteCityResponse>>() {
             @Override
             public void onResponse(Call<List<FavoriteCityResponse>> call, Response<List<FavoriteCityResponse>> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     isCurrentFavorite = false;
                     for (FavoriteCityResponse favorite : response.body()) {
                         if (favorite.getCityName().equalsIgnoreCase(cityName)) {
                             currentFavoriteId = favorite.getId();
                             isCurrentFavorite = true;
-                            if (favorite.isDefault()) {
-                                // Lógica adicional se for a cidade padrão
-                            }
                             break;
                         }
                     }
-                    updateFavoriteButton();
+                    runOnUiThread(() -> updateFavoriteButton());
                 }
             }
 
             @Override
             public void onFailure(Call<List<FavoriteCityResponse>> call, Throwable t) {
-                // Silencioso - não precisa mostrar erro
+                Log.e("Favoritos", "Erro ao verificar favoritos", t);
             }
         });
     }

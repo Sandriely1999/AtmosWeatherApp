@@ -1,8 +1,11 @@
 package com.unasp.atmosweatherapp.service;
 
 import com.unasp.atmosweatherapp.model.CadastroRequest;
+import com.unasp.atmosweatherapp.model.FavoriteCityResponse;
+import com.unasp.atmosweatherapp.model.ForecastResponse;
 import com.unasp.atmosweatherapp.model.LoginRequest;
 import com.unasp.atmosweatherapp.model.LoginResponse;
+import com.unasp.atmosweatherapp.model.WeatherResponse;
 
 import java.util.List;
 

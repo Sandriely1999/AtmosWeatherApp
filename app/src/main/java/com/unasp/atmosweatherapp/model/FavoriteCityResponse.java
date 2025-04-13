@@ -6,7 +6,7 @@ public class FavoriteCityResponse {
     private Long id;
     private String cityName;
     private boolean isDefault;
-    private LocalDateTime createdAt;
+    private String createdAt;
 
 
     public Long getId() {
@@ -33,11 +33,8 @@ public class FavoriteCityResponse {
         isDefault = aDefault;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }
