@@ -57,8 +57,6 @@ public class FavoritesActivity extends AppCompatActivity {
                 intent = new Intent(this, CompareActivity.class);
             } else if (id == R.id.nav_favorite) {
                 return true;
-            } else if (id == R.id.nav_profile) {
-                intent = new Intent(this, ProfileActivity.class);
             } else {
                 return false;
             }
@@ -144,9 +142,10 @@ public class FavoritesActivity extends AppCompatActivity {
     }
 
     private void onFavoriteClicked(FavoriteCityResponse city) {
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("selectedCity", city.getCityName());
-        setResult(RESULT_OK, resultIntent);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("selectedCity", city.getCityName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivity(intent);
         finish();
     }
 

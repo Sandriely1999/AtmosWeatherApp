@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setSelectedItemId(R.id.nav_favorite);
+        bottomNav.setSelectedItemId(R.id.nav_weather); // Corrigido para nav_weather
 
         session = new SessionManager(this);
         if (!session.isLoggedIn()) {
@@ -63,11 +63,22 @@ public class MainActivity extends AppCompatActivity {
         handleFavoriteSelection();
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleFavoriteSelection();
+    }
+
     private void handleFavoriteSelection() {
-        if (getIntent() != null && getIntent().hasExtra("selectedCity")) {
-            String selectedCity = getIntent().getStringExtra("selectedCity");
-            etSearchCity.setText(selectedCity);
-            fetchWeatherData(selectedCity);
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("selectedCity")) {
+            String selectedCity = intent.getStringExtra("selectedCity");
+            if (selectedCity != null && !selectedCity.isEmpty()) {
+                etSearchCity.setText(selectedCity);
+                fetchWeatherData(selectedCity);
+                intent.removeExtra("selectedCity");
+            }
         }
     }
 
@@ -119,8 +130,6 @@ public class MainActivity extends AppCompatActivity {
                 intent = new Intent(this, CompareActivity.class);
             } else if (id == R.id.nav_favorite) {
                 intent = new Intent(this, FavoritesActivity.class);
-            } else if (id == R.id.nav_profile) {
-                intent = new Intent(this, ProfileActivity.class);
             } else {
                 return false;
             }
@@ -171,23 +180,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displayWeatherData(WeatherResponse weather) {
-       try {
-           cardWeather.setVisibility(View.VISIBLE);
+        try {
+            cardWeather.setVisibility(View.VISIBLE);
 
-           tvCity.setText(weather.getCity());
-           tvTemperature.setText(String.format("Temperatura: %.1f°C", weather.getTemperature()));
-           tvHumidity.setText(String.format("Umidade: %d%%", weather.getHumidity()));
-           tvDescription.setText(weather.getDescription());
-           tvDateTime.setText(String.format("Atualizado em: %s",
-                   weather.getForecastDate()));
+            tvCity.setText(weather.getCity());
+            tvTemperature.setText(String.format("Temperatura: %.1f°C", weather.getTemperature()));
+            tvHumidity.setText(String.format("Umidade: %d%%", weather.getHumidity()));
+            tvDescription.setText(weather.getDescription());
+            tvDateTime.setText(String.format("Atualizado em: %s", weather.getForecastDate()));
 
-           setWeatherIcon(weather.getDescription().toLowerCase());
-           checkIfCityIsFavorite(weather.getCity());
-       } catch (Exception e) {
-           throw new RuntimeException(e);
-       }
-
-
+            setWeatherIcon(weather.getDescription().toLowerCase());
+            checkIfCityIsFavorite(weather.getCity());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void setWeatherIcon(String description) {

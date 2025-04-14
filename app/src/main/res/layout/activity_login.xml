@@ -29,7 +29,7 @@
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusBottomEnd="8dp"
-        app:boxStrokeColor="@color/purple_500">
+        app:boxStrokeColor="@color/primary_blue">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editTextUsername"
@@ -54,7 +54,7 @@
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
         app:boxCornerRadiusBottomEnd="8dp"
-        app:boxStrokeColor="@color/purple_500">
+        app:boxStrokeColor="@color/primary_blue">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/editTextSenha"
@@ -74,7 +74,7 @@
         android:layout_height="48dp"
         android:text="Entrar"
         android:textColor="@color/white"
-        android:backgroundTint="@color/purple_500"
+        android:backgroundTint="@color/primary_blue"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
 
@@ -84,7 +84,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:text="Criar Conta"
-        android:textColor="@color/purple_500"
+        android:textColor="@color/accent_orange"
         android:backgroundTint="@color/white"
         android:textStyle="bold"
         android:background="@drawable/button_border"/>
@@ -97,6 +97,6 @@
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:indicatorColor="@color/purple_500"/>
+        app:indicatorColor="@color/accent_orange"/>
 
 </LinearLayout>

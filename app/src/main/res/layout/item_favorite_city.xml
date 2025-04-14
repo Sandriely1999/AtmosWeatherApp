@@ -1,55 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardElevation="4dp">
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/ivWeatherIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="Ícone do tempo" />
+
+            <TextView
+                android:id="@+id/tvCityName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_toEndOf="@id/ivWeatherIcon"
+                android:layout_centerVertical="true" />
+
+            <ImageView
+                android:id="@+id/ivStar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_favorite2"
+                android:visibility="gone"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:contentDescription="Cidade padrão" />
+        </RelativeLayout>
 
         <TextView
-            android:id="@+id/tvCityName"
-            android:layout_width="0dp"
+            android:id="@+id/tvTemperature"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textSize="18sp"/>
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginTop="8dp" />
 
-        <!-- Botão para definir como padrão -->
-        <ImageButton
-            android:id="@+id/btnSetDefault"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_home_outline"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:visibility="gone"
-            app:tint="@color/purple_500"/>
+        <TextView
+            android:id="@+id/tvCondition"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="4dp" />
 
-        <!-- Ícone indicador de cidade padrão -->
-        <ImageView
-            android:id="@+id/ivDefaultIndicator"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_home"
-            android:visibility="gone"
-            app:tint="@color/purple_500"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
 
-        <!-- Novo botão de delete -->
-        <ImageButton
-            android:id="@+id/btnDelete"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_delete"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:layout_marginStart="8dp"
-            app:tint="@color/error_red"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSetDefault"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="Definir padrão"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:backgroundTint="@color/primary_blue"
+                android:textColor="@color/white"
+                android:layout_marginEnd="4dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRemove"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:text="Remover"
+                android:textAllCaps="false"
+                android:textSize="12sp"
+                app:backgroundTint="@color/error_red"
+                android:textColor="@color/white"
+                android:layout_marginStart="4dp" />
+        </LinearLayout>
     </LinearLayout>
-</androidx.cardview.widget.Card-View>
+</androidx.cardview.widget.CardView>
