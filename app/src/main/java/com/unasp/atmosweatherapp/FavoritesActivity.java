@@ -17,6 +17,7 @@ import com.unasp.atmosweatherapp.model.FavoriteCityResponse;
 import com.unasp.atmosweatherapp.service.ApiService;
 import com.unasp.atmosweatherapp.service.RetrofitClient;
 
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -80,8 +81,20 @@ public class FavoritesActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<FavoriteCityResponse>> call, Response<List<FavoriteCityResponse>> response) {
                 progressBar.setVisibility(View.GONE);
-                if (response.isSuccessful()) {
-                    adapter.setCities(response.body());
+                if (response.isSuccessful() && response.body() != null) {
+                    List<FavoriteCityResponse> cities = response.body();
+
+                    // Ordena as cidades - padrão primeiro
+                    Collections.sort(cities, (city1, city2) -> {
+                        if (city1.isDefault() && !city2.isDefault()) {
+                            return -1; // city1 vem antes
+                        } else if (!city1.isDefault() && city2.isDefault()) {
+                            return 1; // city2 vem antes
+                        }
+                        return 0; // mantém a ordem original
+                    });
+
+                    adapter.setCities(cities);
                 }
             }
 
@@ -91,7 +104,6 @@ public class FavoritesActivity extends AppCompatActivity {
                 Log.e("FavoritesActivity", "Erro ao carregar favoritos", t);
                 Toast.makeText(FavoritesActivity.this, "Erro ao carregar favoritos: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
-
         });
     }
 

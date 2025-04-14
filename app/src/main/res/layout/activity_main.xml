@@ -11,7 +11,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_navigation"
+        android:layout_above="@id/bottomShadow"
         android:fillViewport="true">
 
         <LinearLayout
@@ -21,15 +21,22 @@
             android:padding="16dp">
 
             <!-- Logo do app no topo -->
-
             <ImageView
                 android:id="@+id/ivAppLogo"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="0dp"
                 android:src="@drawable/logo_horizontal"
                 android:contentDescription="Atmos Logo" />
+
+            <!-- Borda abaixo da logo -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/horizontal_border" />
 
             <!-- Barra de pesquisa mais simples -->
             <EditText
@@ -39,6 +46,7 @@
                 android:background="@drawable/search_input_background"
                 android:hint="Digite uma cidade"
                 android:padding="12dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginBottom="12dp"
                 android:imeOptions="actionSearch"
                 android:inputType="textCapWords|textAutoComplete"/>
@@ -165,7 +173,15 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Bottom Navigation com novo estilo -->
+    <!-- Borda acima da navegação inferior -->
+    <View
+        android:id="@+id/bottomShadow"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_above="@id/bottom_navigation"
+        android:background="@drawable/horizontal_border" />
+
+    <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
