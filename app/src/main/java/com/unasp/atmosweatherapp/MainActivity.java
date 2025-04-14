@@ -126,6 +126,12 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_forecast) {
                 intent = new Intent(this, ForecastActivity.class);
+                if (etSearchCity != null) {
+                    String cidade = etSearchCity.getText().toString().trim();
+                    if (!cidade.isEmpty()) {
+                        intent.putExtra("city", cidade);
+                    }
+                }
             } else if (id == R.id.nav_compare) {
                 intent = new Intent(this, CompareActivity.class);
             } else if (id == R.id.nav_favorite) {
