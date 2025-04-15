@@ -6,20 +6,41 @@
     android:padding="16dp"
     android:background="@color/white">
 
-    <TextView
-        android:id="@+id/tvForecastDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="14/04/2025"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:paddingBottom="12dp" />
-
     <LinearLayout
-        android:id="@+id/forecastDetailsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <!-- Aqui vão ser adicionadas dinamicamente as linhas com previsão de cada horário -->
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:layout_marginBottom="12dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_calendario"
+            android:contentDescription="Ícone de calendário"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tvForecastDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="14/04/2025"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:textSize="16sp" />
     </LinearLayout>
+
+    <!-- AQUI adicionamos scroll vertical -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/forecastDetailsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
 </LinearLayout>
