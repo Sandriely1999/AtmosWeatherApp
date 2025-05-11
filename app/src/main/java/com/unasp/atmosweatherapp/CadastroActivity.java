@@ -18,6 +18,8 @@ import com.unasp.atmosweatherapp.service.ApiService;
 import com.unasp.atmosweatherapp.service.RetrofitClient;
 import com.unasp.atmosweatherapp.utils.SessionManager;
 
+import java.io.IOException;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -68,7 +70,6 @@ public class CadastroActivity extends AppCompatActivity {
     }
 
     private void cadastrarUsuario(String username, String senha) {
-        Log.d("Cadastro", "Tentando cadastrar: " + username);
         progressBar.setVisibility(View.VISIBLE);
         btnCadastrar.setEnabled(false);
 
@@ -81,27 +82,19 @@ public class CadastroActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 btnCadastrar.setEnabled(true);
 
-                if (response.isSuccessful() && response.body() != null) {
-                    // Login automático (Melhoria #5)
-                    String token = response.body().getToken();
-                    String username = response.body().getUsername();
+                if (response.isSuccessful()) {
+                    LoginResponse loginResponse = response.body();
+                    new SessionManager(CadastroActivity.this)
+                            .saveAuthToken(loginResponse.getToken(), loginResponse.getUsername());
 
-                    SessionManager session = new SessionManager(CadastroActivity.this);
-                    session.saveAuthToken(token, username);
+                    Toast.makeText(CadastroActivity.this,
+                            "Cadastro realizado com sucesso! Bem-vindo, " + username + "!",
+                            Toast.LENGTH_LONG).show();
 
-                    // Redireciona para MainActivity
                     startActivity(new Intent(CadastroActivity.this, MainActivity.class));
                     finish();
-
                 } else {
-                    try {
-                        String errorBody = response.errorBody().string();
-                        Toast.makeText(CadastroActivity.this,
-                                "Erro no cadastro: " + errorBody, Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        Toast.makeText(CadastroActivity.this,
-                                "Erro ao processar resposta", Toast.LENGTH_LONG).show();
-                    }
+                    handleRegistrationError(response, username);
                 }
             }
 
@@ -109,8 +102,36 @@ public class CadastroActivity extends AppCompatActivity {
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 btnCadastrar.setEnabled(true);
-                Toast.makeText(CadastroActivity.this, "Falha na conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Toast.makeText(CadastroActivity.this,
+                        "Falha na conexão. Verifique sua internet.", Toast.LENGTH_LONG).show();
+                Log.e("CADASTRO", "Falha na requisição: " + t.getMessage());
             }
         });
+    }
+
+    private void handleRegistrationError(Response<LoginResponse> response, String username) {
+        try {
+            int statusCode = response.code();
+            String errorMessage;
+
+            if (statusCode == 403) {
+                errorMessage = "O usuário '" + username + "' já está cadastrado. Por favor, escolha outro nome.";
+            } else {
+                errorMessage = "Erro no cadastro (Código: " + statusCode + ")";
+            }
+
+            editTextUsername.setError(errorMessage);
+            editTextUsername.requestFocus();
+            Toast.makeText(CadastroActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+
+
+            String errorBody = response.errorBody() != null ? response.errorBody().string() : "";
+            Log.d("CADASTRO_ERRO", "Status: " + statusCode + " | Response: " + errorBody);
+
+        } catch (IOException e) {
+            Toast.makeText(CadastroActivity.this,
+                    "Erro ao processar resposta do servidor", Toast.LENGTH_LONG).show();
+            Log.e("CADASTRO", "Erro ao ler response", e);
+        }
     }
 }

@@ -1,8 +1,8 @@
 package com.unasp.atmosweatherapp;
 
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -94,18 +94,40 @@ public class LoginActivity extends AppCompatActivity {
                             new SessionManager(LoginActivity.this)
                                     .saveAuthToken(loginResponse.getToken(), loginResponse.getUsername());
 
+                            // Mensagem de sucesso adicionada aqui
+                            Toast.makeText(LoginActivity.this,
+                                    "Login realizado com sucesso! Bem-vindo, " + username + "!",
+                                    Toast.LENGTH_LONG).show();
+
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                         } else {
-                            // Tratamento de erro
-                            String errorBody = response.errorBody() != null ? response.errorBody().string() : "Erro desconhecido";
-                            Toast.makeText(LoginActivity.this,
-                                    "Erro: " + errorBody, Toast.LENGTH_LONG).show();
+                            String errorMessage = "Credenciais inválidas. Verifique seu usuário e senha.";
+
+                            // Tentativa de obter mais detalhes do erro
+                            try {
+                                String errorBody = response.errorBody() != null ?
+                                        response.errorBody().string().toLowerCase() : "";
+
+                                if (errorBody.contains("user not found") || errorBody.contains("usuário não encontrado")) {
+                                    errorMessage = "Usuário não encontrado. Verifique ou crie uma conta.";
+                                    editTextUsername.setError(errorMessage);
+                                    editTextUsername.requestFocus();
+                                } else if (errorBody.contains("invalid password") || errorBody.contains("senha incorreta")) {
+                                    errorMessage = "Senha incorreta. Tente novamente.";
+                                    editTextSenha.setError(errorMessage);
+                                    editTextSenha.requestFocus();
+                                }
+                            } catch (IOException e) {
+                                // Se não conseguir ler o errorBody, mantém a mensagem genérica
+                            }
+
+                            // Mostra o Toast e mensagem no campo
+                            Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
                         Toast.makeText(LoginActivity.this,
-                                "Erro ao processar resposta: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
+                                "Erro ao processar resposta: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -114,16 +136,16 @@ public class LoginActivity extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                     btnLogin.setEnabled(true);
                     Toast.makeText(LoginActivity.this,
-                            "Falha na conexão: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                    t.printStackTrace();
+                            "Falha na conexão. Verifique sua internet.", Toast.LENGTH_LONG).show();
+                    Log.e("LoginError", "Erro na requisição: " + t.getMessage());
                 }
             });
         } catch (Exception e) {
             progressBar.setVisibility(View.GONE);
             btnLogin.setEnabled(true);
             Toast.makeText(LoginActivity.this,
-                    "Erro inesperado: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            e.printStackTrace();
+                    "Erro ao tentar login. Tente novamente.", Toast.LENGTH_LONG).show();
+            Log.e("LoginError", "Erro geral: " + e.getMessage());
         }
     }
 }
