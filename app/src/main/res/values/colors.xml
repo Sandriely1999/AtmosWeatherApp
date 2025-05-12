@@ -3,11 +3,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Novas cores baseadas na imagem de referência -->
     <color name="primary_blue">#00A5D8</color>
     <color name="accent_orange">#FF8A35</color>
     <color name="light_gray">#F5F5F5</color>
     <color name="text_primary">#333333</color>
     <color name="text_secondary">#666666</color>
     <color name="error_red">#F44336</color>
+
+    <color name="accent_red">#FF5252</color>
 </resources>

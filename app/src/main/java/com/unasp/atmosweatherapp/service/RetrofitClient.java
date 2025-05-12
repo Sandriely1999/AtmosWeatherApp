@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
     private static Retrofit retrofit;
-    private static final String BASE_URL = "http://10.0.2.2:8081/";
+    public static final String BASE_URL = "http://10.0.2.2:8081/";
 
     public static Retrofit getClient(Context context) {
         if (retrofit == null) {
@@ -28,7 +28,7 @@ public class RetrofitClient {
             if (token != null) {
                 httpClient.addInterceptor(new Interceptor() {
                     @Override
-                    public Response intercept(Chain chain) throws IOException {
+                    public okhttp3.Response intercept(Chain chain) throws IOException {
                         Request original = chain.request();
                         Request.Builder requestBuilder = original.newBuilder()
                                 .header("Authorization", "Bearer " + token);
