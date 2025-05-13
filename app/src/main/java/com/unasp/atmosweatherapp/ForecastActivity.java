@@ -2,6 +2,7 @@ package com.unasp.atmosweatherapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -14,13 +15,20 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import android.widget.EditText;
 import com.unasp.atmosweatherapp.adapters.ForecastPagerAdapter;
 import com.unasp.atmosweatherapp.model.ForecastResponse;
+import com.unasp.atmosweatherapp.service.ApiService;
+import com.unasp.atmosweatherapp.service.RetrofitClient;
 
+import java.io.IOException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ForecastActivity extends AppCompatActivity {
 
@@ -92,10 +100,47 @@ public class ForecastActivity extends AppCompatActivity {
     }
 
     private void atualizarPrevisao(String cidade) {
-        List<ForecastResponse> todas = buscarPrevisoesMockadas();
-        List<ForecastResponse> filtradas = filtrarPorCidade(todas, cidade);
-        Map<String, List<ForecastResponse>> agrupadas = agruparPorData(filtradas);
-        configurarViewPager(agrupadas);
+ //       List<ForecastResponse> todas = buscarPrevisoesMockadas();
+ //       List<ForecastResponse> filtradas = filtrarPorCidade(todas, cidade);
+ //       Map<String, List<ForecastResponse>> agrupadas = agruparPorData(filtradas);
+ //       configurarViewPager(agrupadas);
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+
+        Call<List<ForecastResponse>> call = apiService.getFiveDayForecast(cidade);
+
+        call.enqueue(new Callback<List<ForecastResponse>>() {
+            @Override
+            public void onResponse(Call<List<ForecastResponse>> call, Response<List<ForecastResponse>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ForecastResponse> previsoes = response.body();
+
+                    // Organiza os dados por data (yyyy-MM-dd)
+                    Map<String, List<ForecastResponse>> agrupadas = agruparPorData(filtrarPorCidade(previsoes, cidade));
+                    configurarViewPager(agrupadas);
+
+                } else {
+                    String errorMessage = "Erro ao carregar previsão.";
+                    if (response.errorBody() != null) {
+                        try {
+                            errorMessage = response.errorBody().string();
+                        } catch (IOException e) {
+                            Log.e("ForecastActivity", "Erro ao ler corpo do erro", e);
+                        }
+                    }
+                    Toast.makeText(ForecastActivity.this,
+                            "Erro: " + response.code() + " - " + errorMessage,
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ForecastResponse>> call, Throwable t) {
+                Toast.makeText(ForecastActivity.this,
+                        "Falha na conexão: " + t.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                Log.e("ForecastActivity", "Falha na requisição", t);
+            }
+        });
     }
 
     private void configurarViewPager(Map<String, List<ForecastResponse>> previsoesPorDia) {
@@ -139,35 +184,35 @@ public class ForecastActivity extends AppCompatActivity {
         return agrupado;
     }
 
-    private List<ForecastResponse> buscarPrevisoesMockadas() {
-        List<ForecastResponse> lista = new ArrayList<>();
-
-        lista.addAll(criarPrevisoes("São Paulo", new String[][]{
-                {"22.92", "76", "chuva leve", "2025-04-13T21:00:00"},
-                {"22.44", "79", "chuva moderada", "2025-04-14T00:00:00"},
-                {"21.33", "87", "chuva leve", "2025-04-14T03:00:00"},
-                {"19.98", "94", "algumas nuvens", "2025-04-14T06:00:00"},
-                {"21.67", "86", "chuva leve", "2025-04-14T09:00:00"},
-                {"22.42", "70", "chuva leve", "2025-04-14T12:00:00"},
-                {"22.00", "70", "chuva leve", "2025-04-14T15:00:00"},
-                {"19.80", "78", "nublado", "2025-04-14T18:00:00"},
-                {"18.98", "85", "chuva leve", "2025-04-14T21:00:00"}
-        }));
-
-        lista.addAll(criarPrevisoes("Capão Redondo", new String[][]{
-                {"20.5", "80", "nublado", "2025-04-13T09:00:00"},
-                {"22.3", "70", "chuva leve", "2025-04-13T12:00:00"},
-                {"23.8", "65", "chuva moderada", "2025-04-13T15:00:00"}
-        }));
-
-        lista.addAll(criarPrevisoes("Paris", new String[][]{
-                {"12.4", "75", "nuvens dispersas", "2025-04-13T09:00:00"},
-                {"14.1", "68", "ensolarado", "2025-04-13T12:00:00"},
-                {"15.7", "60", "ensolarado", "2025-04-13T15:00:00"}
-        }));
-
-        return lista;
-    }
+//    private List<ForecastResponse> buscarPrevisoesMockadas() {
+//        List<ForecastResponse> lista = new ArrayList<>();
+//
+//        lista.addAll(criarPrevisoes("São Paulo", new String[][]{
+//                {"22.92", "76", "chuva leve", "2025-04-13T21:00:00"},
+//                {"22.44", "79", "chuva moderada", "2025-04-14T00:00:00"},
+//                {"21.33", "87", "chuva leve", "2025-04-14T03:00:00"},
+//                {"19.98", "94", "algumas nuvens", "2025-04-14T06:00:00"},
+//                {"21.67", "86", "chuva leve", "2025-04-14T09:00:00"},
+//                {"22.42", "70", "chuva leve", "2025-04-14T12:00:00"},
+//                {"22.00", "70", "chuva leve", "2025-04-14T15:00:00"},
+//                {"19.80", "78", "nublado", "2025-04-14T18:00:00"},
+//                {"18.98", "85", "chuva leve", "2025-04-14T21:00:00"}
+//        }));
+//
+//        lista.addAll(criarPrevisoes("Capão Redondo", new String[][]{
+//                {"20.5", "80", "nublado", "2025-04-13T09:00:00"},
+//                {"22.3", "70", "chuva leve", "2025-04-13T12:00:00"},
+//                {"23.8", "65", "chuva moderada", "2025-04-13T15:00:00"}
+//        }));
+//
+//        lista.addAll(criarPrevisoes("Paris", new String[][]{
+//                {"12.4", "75", "nuvens dispersas", "2025-04-13T09:00:00"},
+//                {"14.1", "68", "ensolarado", "2025-04-13T12:00:00"},
+//                {"15.7", "60", "ensolarado", "2025-04-13T15:00:00"}
+//        }));
+//
+//        return lista;
+//    }
 
     private List<ForecastResponse> criarPrevisoes(String cidade, String[][] dados) {
         List<ForecastResponse> lista = new ArrayList<>();
@@ -182,4 +227,6 @@ public class ForecastActivity extends AppCompatActivity {
         }
         return lista;
     }
+
+
 }

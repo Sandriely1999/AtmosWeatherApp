@@ -52,4 +52,7 @@ public interface ApiService {
     Call<List<WeatherComparisonResponse>> compareCities(
             @Query("cities") List<String> cities
     );
+
+    @GET("/api/weather/forecast/five-day")
+    Call<List<ForecastResponse>> getFiveDayForecast(@Query("city") String city);
 }
