@@ -14,6 +14,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import android.widget.EditText;
 import com.unasp.atmosweatherapp.adapters.ForecastPagerAdapter;
+import com.unasp.atmosweatherapp.model.FavoriteCityResponse;
 import com.unasp.atmosweatherapp.model.ForecastResponse;
 import com.unasp.atmosweatherapp.service.ApiService;
 import com.unasp.atmosweatherapp.service.RetrofitClient;
@@ -37,7 +38,7 @@ public class ForecastActivity extends AppCompatActivity {
     private ViewPager2 viewPagerForecast;
     private TabLayout tabLayout;
 
-    private String cidadeAtual = "Capão Redondo";
+    private String cidadeAtual = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +50,15 @@ public class ForecastActivity extends AppCompatActivity {
         viewPagerForecast = findViewById(R.id.viewPagerForecast);
         tabLayout = findViewById(R.id.tabLayout);
 
+        // Verifica se veio cidade do intent
         String cidadeIntent = getIntent().getStringExtra("city");
         if (cidadeIntent != null && !cidadeIntent.isEmpty()) {
             cidadeAtual = cidadeIntent;
+            etSearchForecastCity.setText(cidadeAtual);
+            atualizarPrevisao(cidadeAtual);
+        } else {
+            // Se não veio cidade do intent, busca a padrão
+            buscarCidadePadrao();
         }
         etSearchForecastCity.setText(cidadeAtual);
         atualizarPrevisao(cidadeAtual);
@@ -99,11 +106,43 @@ public class ForecastActivity extends AppCompatActivity {
         atualizarPrevisao(cidadeAtual);
     }
 
+    private void buscarCidadePadrao() {
+        ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
+        apiService.getDefaultCity().enqueue(new Callback<FavoriteCityResponse>() {
+            @Override
+            public void onResponse(Call<FavoriteCityResponse> call, Response<FavoriteCityResponse> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getCityName() != null) {
+                    cidadeAtual = response.body().getCityName();
+                    etSearchForecastCity.setText(cidadeAtual);
+                    atualizarPrevisao(cidadeAtual);
+                } else {
+                    // Não há cidade padrão definida
+                    cidadeAtual = "";
+                    etSearchForecastCity.setText("");
+                    Toast.makeText(ForecastActivity.this, "Nenhuma cidade padrão definida", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FavoriteCityResponse> call, Throwable t) {
+                cidadeAtual = "";
+                etSearchForecastCity.setText("");
+                Log.e("ForecastActivity", "Erro ao buscar cidade padrão", t);
+                Toast.makeText(ForecastActivity.this, "Erro ao buscar cidade padrão", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
     private void atualizarPrevisao(String cidade) {
  //       List<ForecastResponse> todas = buscarPrevisoesMockadas();
  //       List<ForecastResponse> filtradas = filtrarPorCidade(todas, cidade);
  //       Map<String, List<ForecastResponse>> agrupadas = agruparPorData(filtradas);
  //       configurarViewPager(agrupadas);
+
+        if (cidade == null || cidade.isEmpty()) {
+            Log.d("ForecastActivity", "Cidade vazia, não buscando previsão");
+            return;
+        }
+        Log.d("ForecastActivity", "Buscando previsão para: " + cidade);
         ApiService apiService = RetrofitClient.getClient(this).create(ApiService.class);
 
         Call<List<ForecastResponse>> call = apiService.getFiveDayForecast(cidade);

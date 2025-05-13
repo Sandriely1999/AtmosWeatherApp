@@ -55,4 +55,7 @@ public interface ApiService {
 
     @GET("/api/weather/forecast/five-day")
     Call<List<ForecastResponse>> getFiveDayForecast(@Query("city") String city);
+
+    @GET("/api/weather/favorites/default")
+    Call<FavoriteCityResponse> getDefaultCity();
 }
