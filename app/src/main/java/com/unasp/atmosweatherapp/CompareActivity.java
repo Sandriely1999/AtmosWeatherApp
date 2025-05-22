@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,15 +38,15 @@ public class CompareActivity extends AppCompatActivity {
     private TextView tvTempDiff, tvHumidityDiff;
     private ProgressBar progressBar;
     private LinearLayout compareContainer;
-    private SessionManager session;
+    SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_compare);
 
-        session = new SessionManager(this);
-        if (!session.isLoggedIn()) {
+        sessionManager = new SessionManager(this);
+        if (!sessionManager.isLoggedIn()) {
             redirectToLogin();
             return;
         }
@@ -56,7 +55,7 @@ public class CompareActivity extends AppCompatActivity {
         setupBottomNavigation();
     }
 
-    private void initViews() {
+    void initViews() {
         etCity1 = findViewById(R.id.etCity1);
         etCity2 = findViewById(R.id.etCity2);
         cardCity1 = findViewById(R.id.cardCity1);
@@ -77,7 +76,7 @@ public class CompareActivity extends AppCompatActivity {
         findViewById(R.id.btnCompare).setOnClickListener(v -> compareCities());
     }
 
-    private void setupBottomNavigation() {
+    void setupBottomNavigation() {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setSelectedItemId(R.id.nav_compare);
 
@@ -160,7 +159,7 @@ public class CompareActivity extends AppCompatActivity {
         });
     }
 
-    private void displayComparisonData(WeatherComparisonResponse comparison) {
+    void displayComparisonData(WeatherComparisonResponse comparison) {
         tvCity1Name.setText(comparison.getCityA());
         tvCity1Temp.setText(String.format("Temperatura: %.1f°C", comparison.getTemperatureA()));
         tvCity1Humidity.setText(String.format("Umidade: %d%%", comparison.getHumidityA()));
@@ -188,7 +187,7 @@ public class CompareActivity extends AppCompatActivity {
         }
     }
 
-    private void redirectToLogin() {
+    void redirectToLogin() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
