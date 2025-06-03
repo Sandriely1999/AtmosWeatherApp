@@ -96,17 +96,17 @@ dependencies {
     // Lifecycle components
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
-
-    // DateTime (para melhor manipulação de datas)
+// Biblioteca para manipulação de datas
     implementation("com.jakewharton.threetenabp:threetenabp:1.4.6")
-    implementation(libs.androidx.junit.ktx)
-    implementation(libs.androidx.runner)
-    implementation(libs.androidx.espresso.core)
 
-    // Testes
+// Testes unitários
     testImplementation("junit:junit:4.13.2")
+
+// Testes instrumentados (Android)
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation(libs.androidx.espresso.core.v351)
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
 
     // Testes Unitários (JVM - src/test)
     testImplementation("junit:junit:4.13.2")
