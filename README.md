@@ -141,6 +141,3 @@ Se quiser contribuir para o AtmosWeather, por favor, siga as etapas abaixo:
 
 ---
 
-## 📞 Contato
-
-Para dúvidas ou sugestões, entre em contato pelo [seu-email@exemplo.com](mailto:seu-email@exemplo.com).
